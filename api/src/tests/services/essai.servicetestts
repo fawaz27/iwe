@@ -1,0 +1,58 @@
+describe('getClasseById()', () => {
+    it('should return the class with the given id in the given establishment', async () => {
+      const establishmentId = 1;
+      const classId = 1;
+  
+      const establishment = {
+        id: establishmentId,
+        name: 'Establishment 1',
+      };
+  
+      const classe = {
+        id: classId,
+        name: 'Class 1',
+        establishment,
+      };
+  
+      etsRepository.findOneBy.mockReturnValue(establishment);
+      classRepository.findOne.mockReturnValue(classe);
+  
+      const result = await classService.getClasseById(establishmentId, classId);
+  
+      expect(result).toEqual(classe);
+    });
+  
+    it('should throw ClassWithThatIDNotExistsInEstablishmentException when a class with the given id does not exist in the given establishment', async () => {
+      const establishmentId = 1;
+      const classId = 1;
+  
+      const establishment = {
+        id: establishmentId,
+        name: 'Establishment 1',
+      };
+  
+      etsRepository.findOneBy.mockReturnValue(establishment);
+      classRepository.findOne.mockReturnValue(null);
+  
+      try {
+        await classService.getClasseById(establishmentId, classId);
+        fail();
+      } catch (error) {
+        expect(error).toBeInstanceOf(ClassWithThatIDNotExistsInEstablishmentException);
+      }
+    });
+  
+    it('should throw EstablishmentWithThatIDNotExistsException when an establishment with the given id does not exist', async () => {
+      const establishmentId = 1;
+      const classId = 1;
+  
+      etsRepository.findOneBy.mockReturnValue(null);
+  
+      try {
+        await classService.getClasseById(establishmentId, classId);
+        fail();
+      } catch (error) {
+        expect(error).toBeInstanceOf(EstablishmentWithThatIDNotExistsException);
+      }
+    });
+  });

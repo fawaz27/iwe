@@ -1,0 +1,73 @@
+{
+  "name": "archives",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Duamelo/iwe.git"
+  },
+  "keywords": [
+    "node",
+    "js",
+    "express",
+    "typeorm",
+    "postgres"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fawaz27/Archives/issues"
+  },
+  "homepage": "https://github.com/fawaz27/Archives#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.20.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "class-validator-jsonschema": "^3.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-list-routes": "^1.1.3",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.8.0",
+    "pg": "^8.7.3",
+    "reflect-metadata": "^0.1.13",
+    "swagger-ui-express": "^4.5.0",
+    "typeorm": "^0.3.10"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^29.1.2",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/morgan": "^1.9.3",
+    "@types/node": "^17.0.42",
+    "@types/nodemailer": "^6.4.6",
+    "@types/supertest": "^2.0.12",
+    "@types/swagger-ui-express": "^4.1.3",
+    "jest": "^29.1.2",
+    "nodemon": "^2.0.16",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.3"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/server.ts"
+  }
+}

@@ -1,0 +1,179 @@
+import request from 'supertest';
+import { app } from '../app';
+import { AuthentificationController } from '../controllers/authentification.controller';
+import { AuthentificationService } from '../services/authentification.service';
+
+const authController = new AuthentificationController();
+
+describe('AuthentificationController', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  describe('POST /auth/register', () => {
+    it('should register a new user', async () => {
+      const authService = {
+        register: jest.fn().mockResolvedValue({
+          _id: '123',
+          email: 'test@test.com',
+          role: 'teacher',
+          password: 'hashedPassword',
+        }),
+      };
+
+      app.use('/auth', authController.router);
+      app.set('authentificationService', authService);
+
+      const res = await request(app)
+        .post('/auth/register')
+        .send({
+          email: 'test@test.com',
+          password: 'password',
+          role: 'teacher',
+        });
+
+      expect(res.status).toEqual(201);
+      expect(res.body).toEqual({
+        _id: '123',
+        email: 'test@test.com',
+        role: 'teacher',
+        password: 'hashedPassword',
+      });
+      expect(authService.register).toHaveBeenCalledWith({
+        email: 'test@test.com',
+        password: 'password',
+        role: 'teacher',
+      });
+    });
+
+    it('should return a 400 status if the request is invalid', async () => {
+      const authService = {
+        register: jest.fn().mockResolvedValue({
+          _id: '123',
+          email: 'test@test.com',
+          role: 'teacher',
+          password: 'hashedPassword',
+        }),
+      };
+
+      app.use('/auth', authController.router);
+      app.set('authentificationService', authService);
+
+      const res = await request(app)
+        .post('/auth/register')
+        .send({
+          email: 'test@test.com',
+          password: 'password',
+          role: 'invalidRole',
+        });
+
+      expect(res.status).toEqual(400);
+      expect(authService.register).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /auth/login', () => {
+    it('should log in an existing user', async () => {
+      const authService = {
+        logIn: jest.fn().mockResolvedValue({
+          cookie: 'authCookie=123',
+          result: {
+            _id: '123',
+            email: 'test@test.com',
+            role: 'teacher',
+            password: 'hashedPassword',
+          },
+        }),
+      };
+
+      app.use('/auth', authController.router);
+      app.set('authentificationService', authService);
+
+      const res = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'test@test.com',
+        password: 'password',
+      });
+
+    expect(res.status).toEqual(200);
+    expect(res.body).toEqual({
+      _id: '123',
+      email: 'test@test.com',
+      role: 'teacher',
+      password: 'hashedPassword',
+    });
+    expect(res.headers['set-cookie']).toEqual(['authCookie=123']);
+    expect(authService.logIn).toHaveBeenCalledWith({
+      email: 'test@test.com',
+      password: 'password',
+    });
+  });
+
+  it('should return a 400 status if the request is invalid', async () => {
+    const authService = {
+      logIn: jest.fn().mockResolvedValue({
+        cookie: 'authCookie=123',
+        result: {
+          _id: '123',
+          email: 'test@test.com',
+          role: 'teacher',
+          password: 'hashedPassword',
+        },
+      }),
+    };
+
+    app.use('/auth', authController.router);
+    app.set('authentificationService', authService);
+
+    const res = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'test@test.com',
+      });
+
+    expect(res.status).toEqual(400);
+    expect(authService.logIn).not.toHaveBeenCalled();
+  });
+
+  it('should return a 401 status if the user does not exist', async () => {
+    const authService = {
+      logIn: jest.fn().mockRejectedValue(new WrongCredentialsException()),
+    };
+
+    app.use('/auth', authController.router);
+    app.set('authentificationService', authService);
+
+    const res = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'test@test.com',
+        password: 'password',
+      });
+
+    expect(res.status).toEqual(401);
+    expect(authService.logIn).toHaveBeenCalledWith({
+      email: 'test@test.com',
+      password: 'password',
+    });
+  });
+});
+
+describe('POST /auth/logout', () => {
+  it('should log out an authenticated user', async () => {
+    const authService = {
+      logOut: jest.fn().mockResolvedValue('authCookie=; Max-Age=0'),
+    };
+
+    app.use('/auth', authController.router);
+    app.set('authentificationService', authService);
+
+    const res = await request(app)
+      .post('/auth/logout')
+      .set('Cookie', ['authCookie=123']);
+
+    expect(res.status).toEqual(200);
+    expect(res.headers['set-cookie']).toEqual(['authCookie=; Max-Age=0']);
+  })
+});
+

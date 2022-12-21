@@ -1,0 +1,58 @@
+import request from 'supertest';
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { TaskModule } from './task.module';
+import { TaskStatus } from './enums/task-status.enum';
+
+describe('TaskController', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [TaskModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  describe('GET /tasks', () => {
+    it('should return an array of tasks', async () => {
+      const task1 = { id: '1', title: 'Task 1', status: TaskStatus.OPEN };
+      const task2 = { id: '2', title: 'Task 2', status: TaskStatus.IN_PROGRESS };
+      const tasks = [task1, task2];
+
+      const response = await request(app.getHttpServer())
+        .get('/tasks')
+        .expect(200);
+
+      expect(response.body).toEqual(tasks);
+    });
+  });
+
+  describe('GET /tasks/:id', () => {
+    it('should return a task if it exists', async () => {
+      const task = { id: '1', title: 'Task 1', status: TaskStatus.OPEN };
+
+      const response = await request(app.getHttpServer())
+        .get('/tasks/1')
+        .expect(200);
+
+      expect(response.body).toEqual(task);
+    });
+
+    it('should return a 404 if the task does not exist', async () => {
+      await request(app.getHttpServer())
+        .get('/tasks/999')
+        .expect(404);
+    });
+  });
+
+  describe('POST /tasks', () => {
+    it('should create and return a new task', async () => {
+      const createTaskDto = { title: 'Task 1', description: 'Description 1' };
+      const task = { id: '1', ...createTaskDto, status: TaskStatus.OPEN };
